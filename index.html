@@ -155,14 +155,62 @@ footer .ct{margin-top:10px;letter-spacing:.06em;line-height:1.9;color:#fff}foote
 <footer>නුතාරා &amp; චමිල · 2027 ජනවාරි 14 · කළුතර, ශ්‍රී ලංකාව<div class="ct"><b>විමසීම්</b><br>077-7273855 - සමින්ද<br>075-5888900 - චමිල</div></footer>
 
 <script>
+// Google Apps Script Web App URL එක මෙතැනට paste කරන්න
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby-lq0J2gACkzNNAq4q_JTYlrza8fdsCIHgl_i3r6UXQqInfJq31cTkEtMWDlHEj51D/exec';
+
+// ── COUNTDOWN ──
 var T=new Date('2027-01-14T09:00:00');
 function tick(){var x=Math.max(0,T-new Date()),p=function(n){return String(n).padStart(2,'0')};
 d.textContent=p(Math.floor(x/864e5));h.textContent=p(Math.floor(x%864e5/36e5));m.textContent=p(Math.floor(x%36e5/6e4));s.textContent=p(Math.floor(x%6e4/1e3))}
 tick();setInterval(tick,1000);
-function go(e){e.preventDefault();document.getElementById('f').style.display='none';
-document.getElementById('who').textContent='ස්තූතියි, '+document.getElementById('nm').value+'!';
-document.getElementById('ok').style.display='block';return false}
+
+// ── RSVP: SEND DATA TO GOOGLE SHEETS ──
+async function go(e){
+  e.preventDefault();
+
+  const form = document.getElementById('f');
+  const button = form.querySelector('button[type="submit"]');
+
+  if (!SCRIPT_URL || SCRIPT_URL.includes('PASTE_YOUR_')) {
+    alert('කරුණාකර Google Apps Script Web App URL එක SCRIPT_URL තුළට ඇතුළත් කරන්න.');
+    return false;
+  }
+
+  const data = {
+    name: document.getElementById('nm').value.trim(),
+    phone: document.getElementById('ph').value.trim(),
+    guests: document.getElementById('gs').value,
+    message: document.getElementById('ms').value.trim()
+  };
+
+  button.disabled = true;
+  button.textContent = 'යවමින් පවතී...';
+
+  try {
+    // no-cors is used because Google Apps Script does not expose
+    // a normal cross-origin response to this GitHub Pages site.
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {'Content-Type': 'text/plain;charset=utf-8'},
+      body: JSON.stringify(data)
+    });
+
+    form.style.display = 'none';
+    document.getElementById('who').textContent = 'ස්තූතියි, ' + data.name + '!';
+    document.getElementById('ok').style.display = 'block';
+  } catch (err) {
+    alert('දත්ත යැවීමට නොහැකි විය. Internet connection එක සහ Web App URL එක පරීක්ෂා කරන්න.');
+    button.disabled = false;
+    button.textContent = '♥ තහවුරු කරන්න ♥';
+    console.error(err);
+  }
+  return false;
+}
+
 function openInv(){document.getElementById('cover').classList.add('open');document.body.classList.remove('lock');document.body.classList.add('opened');scrollTo(0,0)}
+
+// ── FLOATING PETALS ──
 (function(){var c=['#F2C4C4','#E4C9B8','#C7A49E','#fff'];for(var i=0;i<18;i++){var p=document.createElement('div'),z=8+Math.random()*10;p.className='pt';p.style.cssText='left:'+Math.random()*100+'%;width:'+z+'px;height:'+z*1.2+'px;background:'+c[i%4]+';animation-duration:'+(7+Math.random()*8)+'s;animation-delay:-'+Math.random()*10+'s';document.body.appendChild(p)}})();
 </script>
 </body>
